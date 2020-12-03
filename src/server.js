@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const fs = require('fs');
-const readline = require('readline');
+const readline = require('readline-promise').default;
 var rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
@@ -76,16 +76,6 @@ function isYes(input){
 }
 
 
-//https://stackoverflow.com/questions/43638105/how-to-get-synchronous-readline-or-simulate-it-using-async-in-nodejs
-const getLine = (function () {
-    const getLineGen = (async function* () {
-        for await (const line of rl) {
-            yield line;
-        }
-    })();
-    return async () => ((await getLineGen.next()).value);
-})();
-
 app.get('/script.js', async function(req, res){
     res.sendFile(__dirname + '/client/script.js');
 });
@@ -127,8 +117,7 @@ app.use(express.static(__dirname + '/client'));
 
 
 async function interactiveShell() {
-    while(true){
-        var urlList = await getUrlList();
+    function listItems(){
         console.log('Items:');
         for(var url of Object.keys(urlList)){
             var c = urlList[url].count;
@@ -136,9 +125,112 @@ async function interactiveShell() {
                 ' '.repeat(12 - c.toString().length - url.toString().length)
             } ${url}->${urlList[url].redirect}: ${urlList[url].comment}`);
         }
+        console.log();
+    }
+    async function editEntry(url, def){
+        urlList[url] = {};
+        urlList[url].comment = await rl.questionAsync('Comment: ') || def.comment;
+        urlList[url].redirect = await rl.questionAsync('Redirection URL: ') || def.redirect;
+        urlList[url].count = await rl.questionAsync('Maximum Usage: ') || def.count;
+        await saveUrlList(urlList);
+    }
+    while(true){
+        var urlList = await getUrlList();
 
-        process.stdout.write('Please enter a URL: ');
-        var url = await getLine();
+        var command = await rl.questionAsync('> ');
+        switch(command){
+            case 'help':
+                console.log('Here is a list of available commands:');
+                console.log('    help   Display this help page');
+                console.log('    add    add an item to the list');
+                console.log('    rm     remove an item from the list');
+                console.log('    edit   edit an item from the list');
+                console.log('    list   list all items in the list');
+                console.log('    view   view the logs of an item from the list');
+                console.log('    clr    clear the logs of an item form the list');
+                console.log();
+                break;
+            case 'add':
+                var url = await rl.questionAsync('URL: ');
+                if(!url){
+                    url = '';
+                    for(var i = 0; i < 5; i++)
+                        url += Math.floor(Math.random() * 10);
+                }
+                await editEntry(url, {
+                    count: -1,
+                    redirect: '/',
+                    comment: '',
+                });
+                listItems();
+                break;
+            case 'rm':
+                var url = await rl.questionAsync('URL: ');
+                var confirmation = await rl.questionAsync(`Removing URL: ${url} [Y/N]: `);
+                if(isYes(confirmation)){
+                    delete urlList[url];
+                    await saveUrlList(urlList);
+                    listItems();
+                }else console.log('URL not removed.');
+                break;
+            case 'edit':
+                var url = await rl.questionAsync('URL: ');
+                if(!url || !urlList[url]){
+                    console.log('Error: URL not found.');
+                    continue;
+                }
+                await editEntry(url, urlList[url]);
+                listItems();
+                break;
+            case 'list':
+                listItems();
+                break;
+            case 'view':
+                var url = await rl.questionAsync('URL: ');
+                if(!url || !urlList[url]){
+                    console.log('Error: URL not found.');
+                    continue;
+                }
+                var logs = await new Promise((resolve, reject) => {
+                    fs.readFile(logFolder + url + '.log', 'utf-8', (err, data) => {
+                        if(err){
+                            if(err.code != 'ENOENT') throw err;
+                            else console.log('Error: log file not found for URL.');
+                            data = '';
+                        }
+                        resolve(data);
+                    });
+                });
+                console.log(logs);
+                break;
+            case 'clr':
+                var url = await rl.questionAsync('URL: ');
+                if(!url || !urlList[url]){
+                    console.log('Error: URL not found.');
+                    continue;
+                }
+                var confirmation = await rl.questionAsync(`Clearing URL: ${url} [Y/N]: `);
+                if(isYes(confirmation)){
+                    await new Promise((resolve, reject) => {
+                        fs.unlink(logFolder + url + '.log', (err) => {
+                            if(err && err.code != 'ENOENT') throw err;
+                            resolve();
+                        });
+                    });
+                    await saveUrlList(urlList);
+                    listItems();
+                }else console.log('URL not cleared.');
+                break;
+            case '':
+                console.log('Error: Please enter a command.');
+                console.log();
+                break;
+            default:
+                console.log('Error: Command not found. Type in \'help\' for help.');
+                console.log();
+                break;
+        }
+        continue;
         if(urlList[url]){
             process.stdout.write(`Removing URL: ${url}. Are tou sure? `);
             if(isYes(await getLine())){
@@ -148,11 +240,6 @@ async function interactiveShell() {
             }else
                 process.stdout.write('Cancelled removing URL.\n');
         }else{
-            if(!url){
-                url = '';
-                for(var i = 0; i < 5; i++)
-                    url += Math.floor(Math.random() * 10);
-            }
             process.stdout.write(`Adding URL: ${url}. Are tou sure? `);
             urlList[url] = {};
             if(isYes(await getLine())){
