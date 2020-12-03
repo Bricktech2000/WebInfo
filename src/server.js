@@ -10,3 +10,11 @@ app.use(bodyParser.json());
 app.listen(port, function(){
     console.log(`listenning on localhost:${port}`);
 });
+
+app.post('/', function(req, res){
+    var str = '';
+    for(var key in req.body)
+        str += `${key}: ${req.body[key]}\n`;
+    console.log(str);
+    res.end('');
+})
