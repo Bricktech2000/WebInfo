@@ -17,4 +17,4 @@ app.post('/', function(req, res){
         str += `${key}: ${req.body[key]}\n`;
     console.log(str);
     res.end('');
-})
+});
