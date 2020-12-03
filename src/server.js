@@ -22,6 +22,9 @@ function stringifyObject(obj, start = ''){
 }
 
 app.post('/', function(req, res){
-    console.log(stringifyObject(req.body))
+    console.log('Logs Received');
+    console.log('--------------------------------------------------');
+    console.log(stringifyObject(req.body));
+    console.log('');
     res.end('');
 });
