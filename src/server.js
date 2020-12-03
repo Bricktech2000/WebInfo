@@ -15,10 +15,6 @@ const urlListFile = 'list.json';
 const logFolder = 'logs/';
 
 
-app.listen(port, function(){
-    console.log(`listenning on localhost:${port}`);
-});
-
 function stringifyObject(obj, start = ''){
     var ret = '';
     for(var key in obj)
@@ -130,7 +126,7 @@ app.post('/*', async function(req, res){
 app.use(express.static(__dirname + '/client'));
 
 
-(async () => {
+async function interactiveShell() {
     while(true){
         var urlList = await getUrlList();
         console.log('Items:');
@@ -171,4 +167,12 @@ app.use(express.static(__dirname + '/client'));
                 process.stdout.write('Cancelled adding URL.\n');
         }
     }
-})();
+};
+
+app.listen(port, function(){
+    console.log(`listenning on localhost:${port}`);
+}).on('error', (e) => {
+    if(e.code != 'EADDRINUSE') throw e;
+    console.log(`Server already running. Interactive shell started.\n`);
+    interactiveShell();
+});
