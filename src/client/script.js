@@ -63,6 +63,11 @@ var WebInfo = {
                     window.removeEventListener('deviceorientation', this);
                     resolve();
                 });
+                setTimeout(function(){
+                    if(data['sensors'].absolute === undefined)
+                        data['sensors'] = '[no accelerometer or access denied]';
+                    resolve();
+                }, 100);
             })
         }catch(e){console.warn(e)} })();
 
