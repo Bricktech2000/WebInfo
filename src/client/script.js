@@ -7,6 +7,14 @@ var WebInfo = {
         
         await (async () => { try{
             data['general'] = {};
+            var currentdate = new Date(); 
+            var datetime = currentdate.getDate() + "/"
+                         + (currentdate.getMonth()+1)  + "/" 
+                         + currentdate.getFullYear() + " @ "  
+                         + currentdate.getHours() + ":"  
+                         + currentdate.getMinutes() + ":" 
+                         + currentdate.getSeconds();
+            data['general'].datetime = datetime;
             data['general'].userAgent = navigator.userAgent || '[empty userAgent]';
             data['general'].referer = document.referer || '[direct navigation]';
             data['general'].online = navigator.onLine ? 'yes' : 'no';
