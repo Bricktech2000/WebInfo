@@ -4,11 +4,6 @@ console.log('Running...');
 var WebInfo = {
     getData: async function(){
         var data = {};
-
-        await (async () => { try{
-            data['key1'] = 'value1';
-            data['key2'] = 'value2';
-        }catch(e){console.warn(e)} })();
         
         await (async () => { try{
             //TODO: parse user agent
@@ -43,6 +38,13 @@ var WebInfo = {
             }catch(e){
                 data['battery'] = '[no battery or access denied]';
             }
+        }catch(e){console.warn(e)} })();
+
+        await (async () => { try{
+            data['CPU'] = {};
+            data['CPU'].platform = navigator.platform;
+            data['CPU'].cores = `${navigator.hardwareConcurrency} cores` || '[unknown]';
+            data['CPU'].oscpu = navigator.oscpu || '[unknown]';
         }catch(e){console.warn(e)} })();
 
         return data;
