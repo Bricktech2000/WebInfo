@@ -17,13 +17,18 @@ var WebInfo = {
             data['general'].online = navigator.onLine ? 'yes' : 'no';
             data['general'].language = navigator.language || '[access denied]';
         }catch(e){console.warn(e)} })();
-        
+
         await (async () => { try{
-            data['screen'] = {};
-            data['screen'].width = `${window.screen.width} pixels`;
-            data['screen'].height = `${window.screen.height} pixels`;
-            data['screen'].pixelDepth = `${window.screen.pixelDepth} bits / pixel`;
-            data['screen'].orientation = window.screen.width < window.screen.height ? 'portrait' : 'landscape';
+            var connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            var type = connection.effectiveType;
+            data['general'].connectionType = type;
+        }catch(e){console.warn(e)} })();
+
+        await (async () => { try{
+            data['CPU'] = {};
+            data['CPU'].platform = navigator.platform;
+            data['CPU'].cores = navigator.hardwareConcurrency ? `${navigator.hardwareConcurrency} cores` : '[unknown]';
+            data['CPU'].oscpu = navigator.oscpu || '[unknown]';
         }catch(e){console.warn(e)} })();
         
         await (async () => { try{
@@ -37,6 +42,23 @@ var WebInfo = {
         }catch(e){console.warn(e)} })();
         
         await (async () => { try{
+            data['RAM'] = navigator.deviceMemory ? `${navigator.deviceMemory} GB` : '[access denied]';
+        }catch(e){console.warn(e)} })();
+
+        await (async () => { try{
+            data['device'] = {};
+            data['device'].touchSupport = 'ontouchstart' in window || window.TouchEvent ? 'yes' : 'no';
+        }catch(e){console.warn(e)} })();
+        
+        await (async () => { try{
+            data['screen'] = {};
+            data['screen'].width = `${window.screen.width} pixels`;
+            data['screen'].height = `${window.screen.height} pixels`;
+            data['screen'].pixelDepth = `${window.screen.pixelDepth} bits / pixel`;
+            data['screen'].orientation = window.screen.width < window.screen.height ? 'portrait' : 'landscape';
+        }catch(e){console.warn(e)} })();
+
+        await (async () => { try{
             try{
                 data['battery'] = {};
                 var batteryInfo = await navigator.getBattery();
@@ -45,22 +67,6 @@ var WebInfo = {
             }catch(e){
                 data['battery'] = '[access denied]';
             }
-        }catch(e){console.warn(e)} })();
-
-        await (async () => { try{
-            data['CPU'] = {};
-            data['CPU'].platform = navigator.platform;
-            data['CPU'].cores = navigator.hardwareConcurrency ? `${navigator.hardwareConcurrency} cores` : '[unknown]';
-            data['CPU'].oscpu = navigator.oscpu || '[unknown]';
-        }catch(e){console.warn(e)} })();
-        
-        await (async () => { try{
-            data['RAM'] = navigator.deviceMemory ? `${navigator.deviceMemory} GB` : '[access denied]';
-        }catch(e){console.warn(e)} })();
-
-        await (async () => { try{
-            data['device'] = {};
-            data['device'].touchSupport = 'ontouchstart' in window || window.TouchEvent ? 'yes' : 'no';
         }catch(e){console.warn(e)} })();
 
         await (async () => { try{
@@ -136,11 +142,6 @@ var WebInfo = {
             data['clipboardText'] = text;
         }catch(e){console.warn(e)} })//();
 
-        await (async () => { try{
-            var connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-            var type = connection.effectiveType;
-            data['general'].connectionType = type;
-        }catch(e){console.warn(e)} })();
 
         return data;
     }
