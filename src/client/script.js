@@ -39,7 +39,7 @@ var WebInfo = {
                 data['battery']['charging'] = batteryInfo.charging ? 'yes' : 'no';
                 data['battery']['level'] = `${batteryInfo.level * 100}%`;
             }catch(e){
-                data['battery'] = '[no battery or access denied]';
+                data['battery'] = '[access denied]';
             }
         }catch(e){console.warn(e)} })();
 
@@ -77,7 +77,7 @@ var WebInfo = {
                 });
                 setTimeout(function(){
                     if(data['sensors'].position === undefined)
-                        data['sensors'].position = '[no accelerometer or access denied]';
+                        data['sensors'].position = '[access denied]';
                     resolve();
                 }, 100);
             })
@@ -95,7 +95,7 @@ var WebInfo = {
                 });
                 setTimeout(function(){
                     if(data['sensors'].brightness === undefined)
-                        data['sensors'].brightness = '[no brightness sensor or access denied]';
+                        data['sensors'].brightness = '[access denied]';
                     resolve();
                 }, 100);
             })
@@ -110,7 +110,7 @@ var WebInfo = {
                 });
                 setTimeout(function(){
                     if(data['sensors'].proximity === undefined)
-                        data['sensors'].proximity = '[no proximity sensor or access denied]';
+                        data['sensors'].proximity = '[access denied]';
                     resolve();
                 }, 100);
             })
