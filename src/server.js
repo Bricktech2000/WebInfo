@@ -21,10 +21,31 @@ function stringifyObject(obj, start = ''){
     return ret;
 }
 
+//https://github.com/geoip-lite/node-geoip
+const geoip = require('geoip-lite');
+function getData(data, req){
+    var ip = req.connection.remoteAddress;
+    data['location'] = {};
+    data['location'].publicIP = ip;
+
+    var lookup = geoip.lookup(ip);
+    if(!lookup){
+        data['location'].location = '[geolocation not found]';
+        return;
+    }
+    data['location'].country = lookup.country || '[country not found]';
+    data['location'].region = lookup.region || '[region not found]';
+    data['location'].city = lookup.city || '[city not found]';
+    data['location'].longitude = lookup.ll[0];
+    data['location'].latitude = lookup.ll[1];
+}
+
 app.post('/', function(req, res){
+    var data = req.body;
+    getData(data, req);
     console.log('Logs Received');
     console.log('--------------------------------------------------');
-    console.log(stringifyObject(req.body));
+    console.log(stringifyObject(data));
     console.log('');
     res.end('');
 });
