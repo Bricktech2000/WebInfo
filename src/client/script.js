@@ -6,7 +6,6 @@ var WebInfo = {
         var data = {};
         
         await (async () => { try{
-            //TODO: parse user agent
             data['general'] = {};
             data['general'].userAgent = navigator.userAgent || '[empty userAgent]';
             data['general'].referer = document.referer || '[direct navigation]';
