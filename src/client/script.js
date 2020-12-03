@@ -118,19 +118,19 @@ var WebInfo = {
         
         await (async () => { try{
             //must be initiated by a user action
-            /*var options = { acceptAllDevices: true };
+            var options = { acceptAllDevices: true };
             var device = await navigator.bluetooth.requestDevice(options);
             data['bluetooth'] = {};
             data['bluetooth'].deviceName = device.name;
             data['bluetooth'].deviceId = device.id;
-            data['bluetooth'].connected = device.gatt.connected ? 'yes' : 'no';*/
-        }catch(e){console.warn(e)} })();
+            data['bluetooth'].connected = device.gatt.connected ? 'yes' : 'no';
+        }catch(e){console.warn(e)} })//();
         
         await (async () => { try{
             //browser asks for permission
-            //var text = await navigator.clipboard.readText();
-            //data['clipboardText'] = text;
-        }catch(e){console.warn(e)} })();
+            var text = await navigator.clipboard.readText();
+            data['clipboardText'] = text;
+        }catch(e){console.warn(e)} })//();
 
         await (async () => { try{
             var connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
