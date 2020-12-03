@@ -1,6 +1,3 @@
-console.log('Running...');
-
-
 var WebInfo = {
     getData: async function(){
         var data = {};
