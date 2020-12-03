@@ -1,10 +1,11 @@
 console.log('Running...');
 
+
 var WebInfo = {
     getData: async function(){
         var data = {};
         for(var key of Object.keys(WebInfo.data))
-            data[key] = await WebInfo.data[key];
+            data[key] = await (WebInfo.data[key] || '[undefined]');
         return data;
     },
     data: {},
@@ -20,8 +21,10 @@ var WebInfo = {
     document.body.appendChild(canvas);
     var gl = canvas.getContext('experimental-webgl');
     var debugRendererInfo = gl.getExtension('WEBGL_debug_renderer_info');
-    WebInfo.data['GPUinfo_renderer'] = gl.getParameter(debugRendererInfo.UNMASKED_RENDERER_WEBGL);
-    WebInfo.data['GPUinfo_vendor'] = gl.getParameter(debugRendererInfo.UNMASKED_VENDOR_WEBGL);
+    WebInfo.data['GPU'] = {};
+    WebInfo.data['GPU'].renderer = gl.getParameter(debugRendererInfo.UNMASKED_RENDERER_WEBGL) || '[unknown renderer]';
+    WebInfo.data['GPU'].vendor = gl.getParameter(debugRendererInfo.UNMASKED_VENDOR_WEBGL) || '[unknown vendor]';
 })();
+
 
 export { WebInfo };

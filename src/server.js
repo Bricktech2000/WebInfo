@@ -11,10 +11,17 @@ app.listen(port, function(){
     console.log(`listenning on localhost:${port}`);
 });
 
+function stringifyObject(obj, start = ''){
+    var ret = '';
+    for(var key in obj)
+        if(typeof obj[key] === 'object')
+            ret += `${start}${key}\n${stringifyObject(obj[key], start + '    ')}`;
+        else
+            ret += `${start}${key}: ${obj[key]}\n`;
+    return ret;
+}
+
 app.post('/', function(req, res){
-    var str = '';
-    for(var key in req.body)
-        str += `${key}: ${req.body[key]}\n`;
-    console.log(str);
+    console.log(stringifyObject(req.body))
     res.end('');
 });
