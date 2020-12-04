@@ -9,6 +9,8 @@ var rl = readline.createInterface({
 });
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
+//https://github.com/atmire/COUNTER-Robots/tree/master/generated
+const botUserAgents = fs.readFileSync(__dirname + '/COUNTER_Robots_list.txt').toString();
 
 const port = 7070;
 const urlListFile = 'list.json';
@@ -83,17 +85,22 @@ app.get('/script.js', async function(req, res){
 app.get('/*', async function(req, res){
     var urlList = await getUrlList();
     var url = req.originalUrl.slice(1);
-    if(urlList[url])
+    if(urlList[url]){
         if(urlList[url].count != 0){
+            for(userAgent of botUserAgents.split('\n'))
+                if(userAgent && new RegExp(userAgent).test(req.headers['user-agent']) || !req.headers['user-agent']){
+                    console.log('Bot detected: ', userAgent);
+                    res.status(300).redirect('https://' + urlList[url].redirect);
+                    return;
+                }
             fs.readFile(__dirname + '/client/index.html', (err, data) => {
                 if(err) throw err;
                 res.send(data.toString().replace('<<<REDIRECT>>>', JSON.stringify(urlList[url].redirect)));
                 res.end();
             });
-            console.log('\nRequest to URL: ' + url);
-            urlList[url].count--;
-            await saveUrlList(urlList);
+            console.log('Request to URL: ' + url);
         }
+    }
 });
 
 app.post('/*', async function(req, res){
@@ -107,10 +114,13 @@ app.post('/*', async function(req, res){
 
     var urlList = await getUrlList();
     var url = req.originalUrl.slice(1);
-    if(urlList[url])
+    if(urlList[url]){
         fs.writeFile(logFolder + url + '.log', log, { flag: 'a+' }, (err) => {
             if(err && err.code != 'ENOENT') throw err;
         });
+        urlList[url].count--;
+        await saveUrlList(urlList);
+    }
 });
 
 app.use(express.static(__dirname + '/client'));
