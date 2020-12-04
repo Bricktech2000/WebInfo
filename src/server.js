@@ -30,6 +30,8 @@ function stringifyObject(obj, start = ''){
 const geoip = require('geoip-lite');
 const uaparser = require('ua-parser-js');
 function getData(data, req){
+    data['general'] = {datetimeServer: new Date().toLocaleString('en-CA', { hour12: false }), ...data['general']};
+
     //https://github.com/geoip-lite/node-geoip
     var ip = req.connection.remoteAddress;
     data['location'] = {};
