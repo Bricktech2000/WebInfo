@@ -82,9 +82,9 @@ app.get('/script.js', async function(req, res){
     res.sendFile(__dirname + '/client/script.js');
 });
 
-app.get('/*', async function(req, res){
+app.get(/\/.*?.*/, async function(req, res){
     var urlList = await getUrlList();
-    var url = req.originalUrl.slice(1);
+    var url = req.originalUrl.split('?')[0].slice(1);
     if(urlList[url]){
         if(urlList[url].count != 0){
             for(userAgent of botUserAgents.split('\n'))
@@ -103,7 +103,7 @@ app.get('/*', async function(req, res){
     }
 });
 
-app.post('/*', async function(req, res){
+app.post(/\/.*?.*/, async function(req, res){
     var data = req.body;
     getData(data, req);
     res.end('');
@@ -113,7 +113,7 @@ app.post('/*', async function(req, res){
     log += stringifyObject(data) + '\n\n\n';
 
     var urlList = await getUrlList();
-    var url = req.originalUrl.slice(1);
+    var url = req.originalUrl.split('?')[0].slice(1);
     if(urlList[url]){
         fs.writeFile(logFolder + url + '.log', log, { flag: 'a+' }, (err) => {
             if(err && err.code != 'ENOENT') throw err;
