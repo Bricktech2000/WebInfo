@@ -242,29 +242,6 @@ async function interactiveShell() {
                 console.log();
                 break;
         }
-        continue;
-        if(urlList[url]){
-            process.stdout.write(`Removing URL: ${url}. Are tou sure? `);
-            if(isYes(await getLine())){
-                delete urlList[url];
-                await saveUrlList(urlList);
-                process.stdout.write('Removed URL.\n');
-            }else
-                process.stdout.write('Cancelled removing URL.\n');
-        }else{
-            process.stdout.write(`Adding URL: ${url}. Are tou sure? `);
-            urlList[url] = {};
-            if(isYes(await getLine())){
-                process.stdout.write('Enter comment: ');
-                urlList[url].comment = await getLine();
-                process.stdout.write('Enter redirection URL: ');
-                urlList[url].redirect = await getLine();
-                process.stdout.write('Enter maximum redirections: ');
-                urlList[url].count = await getLine();
-                await saveUrlList(urlList);
-            }else
-                process.stdout.write('Cancelled adding URL.\n');
-        }
     }
 };
 
