@@ -154,7 +154,8 @@ async function interactiveShell() {
         switch(command){
             case 'help':
                 console.log('Here is a list of available commands:');
-                console.log('    help   Display this help page');
+                console.log('    help   display this help page');
+                console.log('    exit   exit the program');
                 console.log('    add    add an item to the list');
                 console.log('    rm     remove an item from the list');
                 console.log('    edit   edit an item from the list');
@@ -234,6 +235,8 @@ async function interactiveShell() {
                     listItems();
                 }else console.log('URL not cleared.');
                 break;
+            case 'exit':
+                process.exit(0);
             case '':
                 console.log('Error: Please enter a command.');
                 console.log();
