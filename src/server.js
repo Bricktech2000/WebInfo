@@ -3,10 +3,7 @@ const app = express();
 const bodyParser = require('body-parser');
 const fs = require('fs');
 const readline = require('readline-promise').default;
-var rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
+
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 //https://github.com/atmire/COUNTER-Robots/tree/master/generated
@@ -129,6 +126,10 @@ app.use(express.static(__dirname + '/client'));
 
 
 async function interactiveShell() {
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
     function listItems(){
         console.log('Items:');
         for(var url of Object.keys(urlList)){
@@ -246,9 +247,9 @@ async function interactiveShell() {
 };
 
 app.listen(port, function(){
-    console.log(`listenning on localhost:${port}`);
+    console.log(`listenning on localhost:${port}\n`);
 }).on('error', (e) => {
     if(e.code != 'EADDRINUSE') throw e;
-    console.log(`Server already running. Interactive shell started.\n`);
+    console.log(`Server already listenning on localhost:${port}. Interactive shell started.\n`);
     interactiveShell();
 });
