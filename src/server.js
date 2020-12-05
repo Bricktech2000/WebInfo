@@ -148,9 +148,8 @@ async function interactiveShell() {
         await saveUrlList(urlList);
     }
     while(true){
-        var urlList = await getUrlList();
-
         var command = await rl.questionAsync('> ');
+        var urlList = await getUrlList();
         switch(command){
             case 'help':
                 console.log('Here is a list of available commands:');
