@@ -9,7 +9,7 @@ app.use(bodyParser.json());
 //https://github.com/atmire/COUNTER-Robots/tree/master/generated
 const botUserAgents = fs.readFileSync(__dirname + '/COUNTER_Robots_list.txt').toString();
 
-const port = 7070;
+const port = 70;
 const urlListFile = 'list.json';
 const logFolder = 'logs/';
 
