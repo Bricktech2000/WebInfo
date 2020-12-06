@@ -3,8 +3,8 @@ import bodyParser from 'body-parser';
 import fs from 'fs';
 import _readline from 'readline-promise';
 import path from 'path';
-import { WebInfo } from './WebInfo-server.js'
-import deepmerge from 'deepmerge'
+import { WebInfo } from './server/WebInfo-server.js'
+import deepmerge from 'deepmerge';
 
 const readline = _readline.default;
 const __dirname = path.resolve();
@@ -13,11 +13,13 @@ const app = express();
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 //https://github.com/atmire/COUNTER-Robots/tree/master/generated
-const botUserAgents = fs.readFileSync(__dirname + '/COUNTER_Robots_list.txt').toString();
+const botUserAgents = fs.readFileSync(path.join(__dirname, '/server/COUNTER_Robots_list.txt')).toString();
 
 const port = 70;
 const urlListFile = 'list.json';
 const logFolder = 'logs/';
+const USE_HTTPS = true;
+
 
 
 function stringifyObject(obj, start = ''){
@@ -55,7 +57,7 @@ function isYes(input){
 
 
 app.get('/WebInfo-client.js', async function(req, res){
-    res.sendFile(__dirname + '/client/WebInfo-client.js');
+    res.sendFile(path.join(__dirname, '/client/WebInfo-client.js'));
 });
 
 app.get(/\/.*?.*/, async function(req, res){
@@ -69,7 +71,7 @@ app.get(/\/.*?.*/, async function(req, res){
                     res.status(300).redirect('https://' + urlList[url].redirect);
                     return;
                 }
-            fs.readFile(__dirname + '/client/index.html', (err, data) => {
+            fs.readFile(path.join(__dirname, '/client/index.html'), (err, data) => {
                 if(err) throw err;
                 res.send(data.toString().replace('<<<REDIRECT>>>', JSON.stringify(urlList[url].redirect)));
                 res.end();
@@ -91,7 +93,7 @@ app.post(/\/.*?.*/, async function(req, res){
     var urlList = await getUrlList();
     var url = req.originalUrl.split('?')[0].slice(1);
     if(urlList[url]){
-        fs.writeFile(logFolder + url + '.log', log, { flag: 'a+' }, (err) => {
+        fs.writeFile(path.join(logFolder, url + '.log'), log, { flag: 'a+' }, (err) => {
             if(err && err.code != 'ENOENT') throw err;
         });
         urlList[url].count--;
@@ -99,7 +101,7 @@ app.post(/\/.*?.*/, async function(req, res){
     }
 });
 
-app.use(express.static(__dirname + '/client'));
+app.use(express.static(path.join(__dirname, '/client')));
 
 
 async function interactiveShell() {
@@ -182,7 +184,7 @@ async function interactiveShell() {
                     continue;
                 }
                 var logs = await new Promise((resolve, reject) => {
-                    fs.readFile(logFolder + url + '.log', 'utf-8', (err, data) => {
+                    fs.readFile(path.join(logFolder, url + '.log'), 'utf-8', (err, data) => {
                         if(err){
                             if(err.code != 'ENOENT') throw err;
                             else console.log('Error: log file not found for URL.');
@@ -202,7 +204,7 @@ async function interactiveShell() {
                 var confirmation = await rl.questionAsync(`Clearing URL: ${url} [Y/N]: `);
                 if(isYes(confirmation)){
                     await new Promise((resolve, reject) => {
-                        fs.unlink(logFolder + url + '.log', (err) => {
+                        fs.unlink(path.join(logFolder, url + '.log'), (err) => {
                             if(err && err.code != 'ENOENT') throw err;
                             resolve();
                         });
@@ -225,7 +227,22 @@ async function interactiveShell() {
     }
 };
 
-app.listen(port, function(){
+import http from 'http';
+import https from 'https';
+
+var server;
+if(USE_HTTPS){
+    var p = path.join(__dirname, '/server/');
+    const credentials = {
+        key: fs.readFileSync(path.join(p, '/private.key')),
+        cert: fs.readFileSync(path.join(p, '/certificate.crt')),
+        ca: fs.readFileSync(path.join(p, '/ca_bundle.crt')),
+    };
+
+    server = https.createServer(credentials, app);
+}else server = http.createServer(app);
+
+server.listen(port, function(){
     console.log(`listenning on localhost:${port}\n`);
 }).on('error', (e) => {
     if(e.code != 'EADDRINUSE') throw e;
