@@ -3,6 +3,8 @@ import bodyParser from 'body-parser';
 import fs from 'fs';
 import _readline from 'readline-promise';
 import path from 'path';
+import { WebInfo } from './WebInfo-server.js'
+import deepmerge from 'deepmerge'
 
 const readline = _readline.default;
 const __dirname = path.resolve();
@@ -26,35 +28,6 @@ function stringifyObject(obj, start = ''){
         else
             ret += `${start}${key}: ${obj[key]}\n`;
     return ret;
-}
-
-import geoip from 'geoip-lite';
-import uaparser from 'ua-parser-js';
-function getData(data, req){
-    data['general'] = {datetimeServer: new Date().toLocaleString('en-CA', { hour12: false }), ...data['general']};
-
-    //https://github.com/geoip-lite/node-geoip
-    var ip = req.connection.remoteAddress;
-    data['location'] = {};
-    data['location'].publicIP = ip;
-
-    var lookup = geoip.lookup(ip);
-    if(!lookup)
-        data['location'].location = '[not found]';
-    else{
-        data['location'].country = lookup.country || '[country not found]';
-        data['location'].region = lookup.region || '[region not found]';
-        data['location'].city = lookup.city || '[city not found]';
-        data['location'].longitude = lookup.ll[0];
-        data['location'].latitude = lookup.ll[1];
-    }
-
-    //https://www.npmjs.com/package/ua-parser-js
-    var res = uaparser(req.headers['user-agent']);
-    data['general'].browser = `${res.browser.name} ${res.browser.version}`;
-    data['device'] = {...res.device, ...data['device']};
-    data['device'].operatingSystem = `${res.os.name} ${res.os.version}`;
-    data['CPU'].architecture = res.cpu.architecture || '[unknown]';
 }
 
 async function getUrlList(){
@@ -81,8 +54,8 @@ function isYes(input){
 }
 
 
-app.get('/script.js', async function(req, res){
-    res.sendFile(__dirname + '/client/script.js');
+app.get('/WebInfo-client.js', async function(req, res){
+    res.sendFile(__dirname + '/client/WebInfo-client.js');
 });
 
 app.get(/\/.*?.*/, async function(req, res){
@@ -107,8 +80,8 @@ app.get(/\/.*?.*/, async function(req, res){
 });
 
 app.post(/\/.*?.*/, async function(req, res){
-    var data = req.body;
-    getData(data, req);
+    //https://davidwalsh.name/javascript-deep-merge
+    var data = deepmerge(req.body, await WebInfo.getData(req));
     res.end('');
 
     var log = '';

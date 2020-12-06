@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/Bricktech2000/WebInfo#readme",
   "dependencies": {
+    "deepmerge": "^4.2.2",
     "express": "^4.17.1",
     "geoip-lite": "^1.4.2",
     "readline-promise": "^1.0.4",
