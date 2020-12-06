@@ -68,9 +68,9 @@ var WebInfo = {
                 window.addEventListener('deviceorientation', function(event){
                     data['sensors'].absolute = event.absolute;
                     if(event.alpha){
-                        data['sensors'].alpha = event.alpha;
-                        data['sensors'].beta = event.beta;
-                        data['sensors'].gamma = event.gamma;
+                        data['sensors'].alpha = `${event.alpha}°`;
+                        data['sensors'].beta = `${event.beta}°`;
+                        data['sensors'].gamma = `${event.gamma}°`;
                     }
                     data['sensors'].position = 
                         (Math.abs(event.beta) + Math.abs(event.gamma) < 5)

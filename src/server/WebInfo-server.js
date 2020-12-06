@@ -23,8 +23,8 @@ var WebInfo = {
                 data['location'].country = lookup.country || '[country not found]';
                 data['location'].region = lookup.region || '[region not found]';
                 data['location'].city = lookup.city || '[city not found]';
-                data['location'].longitude = lookup.ll[0];
-                data['location'].latitude = lookup.ll[1];
+                data['location'].longitude = `${lookup.ll[0]}° N`;
+                data['location'].latitude = `${lookup.ll[1]}° E/W`;
             }
         }catch(e){console.warn(e)} })();
 
