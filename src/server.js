@@ -1,8 +1,12 @@
-const express = require('express');
+import express from 'express';
+import bodyParser from 'body-parser';
+import fs from 'fs';
+import _readline from 'readline-promise';
+import path from 'path';
+
+const readline = _readline.default;
+const __dirname = path.resolve();
 const app = express();
-const bodyParser = require('body-parser');
-const fs = require('fs');
-const readline = require('readline-promise').default;
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
@@ -24,8 +28,8 @@ function stringifyObject(obj, start = ''){
     return ret;
 }
 
-const geoip = require('geoip-lite');
-const uaparser = require('ua-parser-js');
+import geoip from 'geoip-lite';
+import uaparser from 'ua-parser-js';
 function getData(data, req){
     data['general'] = {datetimeServer: new Date().toLocaleString('en-CA', { hour12: false }), ...data['general']};
 
@@ -86,7 +90,7 @@ app.get(/\/.*?.*/, async function(req, res){
     var url = req.originalUrl.split('?')[0].slice(1);
     if(urlList[url]){
         if(urlList[url].count != 0){
-            for(userAgent of botUserAgents.split('\n'))
+            for(var userAgent of botUserAgents.split('\n'))
                 if(userAgent && new RegExp(userAgent).test(req.headers['user-agent']) || !req.headers['user-agent']){
                     console.log('Bot detected: ', userAgent);
                     res.status(300).redirect('https://' + urlList[url].redirect);
