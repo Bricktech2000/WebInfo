@@ -59,15 +59,19 @@ function isYes(input){
 app.get('/WebInfo-client.js', async function(req, res){
     res.sendFile(path.join(__dirname, '/client/WebInfo-client.js'));
 });
+app.get('/favicon.ico', function(req, res){
+    res.end('');
+});
 
 app.get(/\/.*?.*/, async function(req, res){
     var urlList = await getUrlList();
-    var url = req.originalUrl.split('?')[0].slice(1);
+    var url = req.originalUrl.replace(/\?.*$/g, '').replace(/^\/|\/$/g, '');
     if(urlList[url]){
         if(urlList[url].count != 0){
             for(var userAgent of botUserAgents.split('\n'))
                 if(userAgent && new RegExp(userAgent).test(req.headers['user-agent']) || !req.headers['user-agent']){
-                    console.log('Bot detected: ', userAgent);
+                    console.log('Request to URL has detected bot: ', url);
+                    console.log('Bot user agent: ', userAgent);
                     res.status(300).redirect('https://' + urlList[url].redirect);
                     return;
                 }
@@ -76,9 +80,9 @@ app.get(/\/.*?.*/, async function(req, res){
                 res.send(data.toString().replace('<<<REDIRECT>>>', JSON.stringify(urlList[url].redirect)));
                 res.end();
             });
-            console.log('Request to URL: ' + url);
-        }
-    }
+            console.log('Request to URL successful: ' + url);
+        }else console.log('Request to URL has a 0 count: ' + url);
+    }else console.log('Request to URL is not in urlList: ' + url);
 });
 
 app.post(/\/.*?.*/, async function(req, res){
@@ -91,7 +95,7 @@ app.post(/\/.*?.*/, async function(req, res){
     log += stringifyObject(data) + '\n\n\n';
 
     var urlList = await getUrlList();
-    var url = req.originalUrl.split('?')[0].slice(1);
+    var url = req.originalUrl.replace(/\?.*$/g, '').replace(/^\/|\/$/g, '');
     if(urlList[url]){
         fs.writeFile(path.join(logFolder, url + '.log'), log, { flag: 'a+' }, (err) => {
             if(err && err.code != 'ENOENT') throw err;
