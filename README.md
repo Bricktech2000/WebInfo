@@ -8,11 +8,12 @@ Requirements
 
 * NodeJS 14+
 * Any browser with ES6 support
+* certbot
 
 Installation
 ------------
 
-Make sure you have created and copied the required HTTPS files under `/WebInfo/src/server` (*private.key*, *certificate.crt* and *ca_bundle.crt*).
+Make sure certbot has created the required HTTPS files under `/etc/letsencrypt/live/info.emilien.ml/`.
 
 `:/WebInfo/src$ npm install`
 

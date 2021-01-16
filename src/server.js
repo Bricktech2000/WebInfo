@@ -236,11 +236,10 @@ import https from 'https';
 
 var server;
 if(USE_HTTPS){
-    var p = path.join(__dirname, '/server/');
-    const credentials = {
-        key: fs.readFileSync(path.join(p, '/private.key')),
-        cert: fs.readFileSync(path.join(p, '/certificate.crt')),
-        ca: fs.readFileSync(path.join(p, '/ca_bundle.crt')),
+    var p = '/etc/letsencrypt/live/info.emilien.ml/';
+    var credentials = {
+      key: fs.readFileSync(path.join(p, 'privkey.pem')),
+      cert: fs.readFileSync(path.join(p, 'fullchain.pem')),
     };
 
     server = https.createServer(credentials, app);

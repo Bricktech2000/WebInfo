@@ -1,6 +1,3 @@
 **/node_modules/
 src/list.json
 src/logs/
-
-*.key
-*.crt
