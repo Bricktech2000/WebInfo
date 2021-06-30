@@ -36,7 +36,7 @@ Here is a list of instructions for a minimal example:
 
     ```bash
     :/WebInfo/src$ node server.js
-    Server already listenning on localhost:70. Interactive shell started.
+    Server already listening on localhost:70. Interactive shell started.
 
     ```
 

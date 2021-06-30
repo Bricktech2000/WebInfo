@@ -246,9 +246,9 @@ if(USE_HTTPS){
 }else server = http.createServer(app);
 
 server.listen(port, function(){
-    console.log(`listenning on localhost:${port}\n`);
+    console.log(`listening on localhost:${port}\n`);
 }).on('error', (e) => {
     if(e.code != 'EADDRINUSE') throw e;
-    console.log(`Server already listenning on localhost:${port}. Interactive shell started.\n`);
+    console.log(`Server already listening on localhost:${port}. Interactive shell started.\n`);
     interactiveShell();
 });
