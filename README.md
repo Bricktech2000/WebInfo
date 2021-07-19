@@ -13,7 +13,7 @@ Requirements
 Installation
 ------------
 
-Make sure certbot has created the required HTTPS files under `/etc/letsencrypt/live/info.emilien.ml/`.
+Make sure certbot has created the required HTTPS files under `/etc/letsencrypt/live/emilien.ca/`.
 
 `:/WebInfo/src$ npm install`
 

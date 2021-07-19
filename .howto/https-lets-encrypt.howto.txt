@@ -6,7 +6,7 @@ const USE_HTTPS = false;
 comment out everything but "app.use(express.static(...))"
 
 
-cloudflare DNS: cname info emilien.ml auto unproxied
+cloudflare DNS: cname info emilien.ca auto unproxied
 portzilla: info useHttps:true
 router: change port forwarding to 80
 
